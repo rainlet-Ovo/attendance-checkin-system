@@ -1,0 +1,63 @@
+#include <SPI.h>
+#include <MFRC522.h>
+
+// 你的硬件引脚配置
+#define RC522_SS_PIN   5
+#define RC522_RST_PIN  4
+#define BEEP_PIN       2
+
+MFRC522 mfrc522(RC522_SS_PIN, RC522_RST_PIN);
+
+#define BEEP_ON  HIGH
+#define BEEP_OFF LOW
+
+void setup() {
+  Serial.begin(115200);
+  SPI.begin();
+  mfrc522.PCD_Init();
+  pinMode(BEEP_PIN, OUTPUT);
+  digitalWrite(BEEP_PIN, BEEP_OFF);
+}
+
+void loop() {
+  // 处理电脑端的验证指令
+  if (Serial.available() > 0) {
+    char cmd = Serial.read();
+    if (cmd == '1') {
+      // 验证成功：长鸣1秒
+      digitalWrite(BEEP_PIN, BEEP_ON);
+      delay(1000);
+      digitalWrite(BEEP_PIN, BEEP_OFF);
+    } else if (cmd == '0') {
+      // 验证失败：短鸣3次
+      for (int i = 0; i < 3; i++) {
+        digitalWrite(BEEP_PIN, BEEP_ON);
+        delay(200);
+        digitalWrite(BEEP_PIN, BEEP_OFF);
+        delay(200);
+      }
+    }
+  }
+
+  // 检测并读取卡片物理ID
+  if (!mfrc522.PICC_IsNewCardPresent() || !mfrc522.PICC_ReadCardSerial()) {
+    delay(100);
+    return;
+  }
+
+  // 生成8位大写十六进制物理ID（和手机显示格式完全一致）
+  String cardPhysicalID = "";
+  for (byte i = 0; i < mfrc522.uid.size; i++) {
+    if (mfrc522.uid.uidByte[i] < 0x10) cardPhysicalID += "0";
+    cardPhysicalID += String(mfrc522.uid.uidByte[i], HEX);
+  }
+  cardPhysicalID.toUpperCase();
+
+  // 只发送物理ID到电脑，无其他打印
+  Serial.println(cardPhysicalID);
+
+  // 释放卡片
+  mfrc522.PICC_HaltA();
+  mfrc522.PCD_StopCrypto1();
+  delay(500);
+}
