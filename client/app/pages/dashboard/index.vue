@@ -170,7 +170,7 @@
           <div class="form-item">
             <label class="form-label">初始密码：</label>
             <div class="input-group">
-              <input v-model="addForm.password" :type="showPassword ? 'text' : 'password'" placeholder="默认密码123456"
+              <input v-model="addForm.password" :type="showPassword ? 'text' : 'password'" placeholder="请输入初始密码"
                 class="form-input" required />
               <button type="button" @click="showPassword = !showPassword" class="btn default-btn small-btn">
                 {{ showPassword ? '隐藏' : '显示' }}
@@ -257,7 +257,7 @@ import { ElMessage } from 'element-plus'
 const router = useRouter();
 const addDialogVisible = ref(false); // 弹窗显示状态
 const addForm = ref({ // 新增员工表单
-  cardId: '', username: '', realName: '', password: '123456', positionId: ''
+  cardId: '', username: '', realName: '', password: '', positionId: ''
 });
 
 const cameraStream = ref(null); // 摄像头流
@@ -421,7 +421,7 @@ const deleteEmployee = async (id) => {
 };
 
 const openAddEmployeeDialog = () => {
-  addForm.value = { cardId: '', username: '', realName: '', password: '123456', positionId: '' };
+  addForm.value = { cardId: '', username: '', realName: '', password: '', positionId: '' };
   cardTip.value = '请刷NFC卡自动填充卡号...';
   addDialogVisible.value = true;
   if (nfcTimer) clearInterval(nfcTimer);
